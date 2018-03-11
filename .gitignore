@@ -1,1 +1,10 @@
 /target/
+/Evidencia/*
+/src/main/java/org/gnu/automation/cucumber_bdd_se/functionalities/firstdata/*
+/src/main/java/org/gnu/automation/cucumber_bdd_se/pageobjects/firstdata/*
+/src/main/java/org/gnu/automation/cucumber_bdd_se/steps/firstdata/*
+
+/src/main/resources/features/firstdata/*
+/src/main/resources/testdata/firstdata/*
+
+/src/test/java/org/gnu/automation/cucumber_bdd_se/RunTestFirstdata.java
