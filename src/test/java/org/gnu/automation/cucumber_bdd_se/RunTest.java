@@ -18,7 +18,9 @@ import cucumber.api.junit.Cucumber;
 				"org.gnu.automation.cucumber_bdd_se.steps",
 				"org.gnu.automation.cucumber_bdd_se.steps.crmpro"
 				}, 
-		tags = "@Hello"
+		tags = { 
+				"@CrmproTransacFinancPlanVsArq"
+				}
 		)
 
 public class RunTest {
