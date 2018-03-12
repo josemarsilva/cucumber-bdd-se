@@ -48,14 +48,14 @@ public class AppTest
     {
     	System.out.println("testExcelToJson()");
     	
-//    	ExcelToJson excelToJsonTestData = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\TestData.xlsx");
+    	ExcelToJson excelToJsonTestData = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\TestData.xlsx");
     	ExcelToJson excelToJsonConfigLayout = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\ConfigLayout.xlsx");
-//    	ExcelToJson excelToJsonConfigCredencial = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\ConfigCredencial.xlsx");
+    	ExcelToJson excelToJsonConfigCredencial = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\ConfigCredencial.xlsx");
     	
-    	System.out.println("end.");
+    	System.out.println(excelToJsonTestData.getJsonObject().toString());
 
     	assertTrue( true );
     }
-
+ 
     
 }

@@ -185,7 +185,7 @@ public class ExcelToJson {
 									if (colName!=null) {
 										// jsonRow = { "row": <row>, "field#1": "value#1", "field#2": "value#2", ... , "field#n": "value#n" } 
 										jsonWorksheetRow.addProperty(colName, getCellValue(cell));
-										System.out.println(colName + ": " + getCellValue(cell));
+										//System.out.println(colName + ": " + getCellValue(cell));
 									}
 									
 								}
