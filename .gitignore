@@ -1,6 +1,7 @@
 /target/
 /tmp/*
 /tmp*.*
+/logs/*
 
 
 /src/main/java/org/gnu/automation/cucumber_bdd_se/functionalities/firstdata/*
