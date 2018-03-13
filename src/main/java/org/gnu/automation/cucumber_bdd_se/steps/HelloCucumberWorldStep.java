@@ -8,19 +8,19 @@ public class HelloCucumberWorldStep {
 
 	@Dado("^que o mundo existe$")
 	public boolean queOMundoExiste() throws Throwable {
-		System.out.println("queOMundoExiste()");
+		System.out.println("Dado queOMundoExiste()");
 		return true;
 	}
 
 	@Quando("^eu pensar$")
 	public boolean euPensar() throws Throwable {
-		System.out.println("euPensar()");
+		System.out.println("Quando euPensar()");
 		return true;
 	}
 
 	@Entao("^eu existo$")
 	public boolean euExisto() throws Throwable {
-		System.out.println("euExisto()");
+		System.out.println("Entao euExisto()");
 		return true;
 	}
 	

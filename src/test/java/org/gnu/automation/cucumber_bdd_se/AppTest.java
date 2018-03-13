@@ -4,7 +4,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.gnu.automation.cucumber_bdd_se.util.ExcelToJson;
+import org.gnu.automation.cucumber_bdd_se.util.ToJsonFromExcel;
+import org.gnu.automation.cucumber_bdd_se.util.TableOf;
+import org.gnu.automation.cucumber_bdd_se.util.WorkbookSheetTable;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -44,18 +46,35 @@ public class AppTest
         assertTrue( true );
     }
     
-    public void testExcelToJson() throws Exception
+    public void testToJsonFromExcel() throws Exception
     {
-    	System.out.println("testExcelToJson()");
-    	
-    	ExcelToJson excelToJsonTestData = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\TestData.xlsx");
-    	ExcelToJson excelToJsonConfigLayout = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\ConfigLayout.xlsx");
-    	ExcelToJson excelToJsonConfigCredencial = new ExcelToJson(".\\src\\main\\resources\\testdata\\crmpro\\ConfigCredencial.xlsx");
-    	
-    	System.out.println(excelToJsonTestData.getJsonObject().toString());
+    	ToJsonFromExcel excelToJsonTestData = new ToJsonFromExcel(".\\src\\main\\resources\\testdata\\crmpro\\TestData.xlsx");
+    	ToJsonFromExcel excelToJsonConfigLayout = new ToJsonFromExcel(".\\src\\main\\resources\\testdata\\crmpro\\ConfigLayout.xlsx");
+    	ToJsonFromExcel excelToJsonConfigCredencial = new ToJsonFromExcel(".\\src\\main\\resources\\testdata\\crmpro\\ConfigCredencial.xlsx");
 
     	assertTrue( true );
     }
+    
+    public void testWorkbookWorksheetTable() throws Exception
+    {
+    	WorkbookSheetTable wbSheetTableTestData = new WorkbookSheetTable(".\\src\\main\\resources\\testdata\\crmpro\\TestData.xlsx");
+    	WorkbookSheetTable wbSheetTableConfigRecType = new WorkbookSheetTable(".\\src\\main\\resources\\testdata\\crmpro\\ConfigLayout.xlsx", "RecordType");
+    	WorkbookSheetTable wbSheetTableConfigRecField = new WorkbookSheetTable(".\\src\\main\\resources\\testdata\\crmpro\\ConfigLayout.xlsx", "RecordField");
+    	WorkbookSheetTable wbSheetTableConfigCredencial = new WorkbookSheetTable(".\\src\\main\\resources\\testdata\\crmpro\\ConfigCredencial.xlsx");
+    	
+    	TableOf tableOfTestData = wbSheetTableTestData.getTableOfWorkbookSheetTable();
+    	TableOf tableOfConfigRecType = wbSheetTableConfigRecType.getTableOfWorkbookSheetTable();
+    	TableOf tableOfConfigRecField = wbSheetTableConfigRecField.getTableOfWorkbookSheetTable("RecordField");
+    	TableOf tableOfTableConfigCredencial = wbSheetTableConfigCredencial.getTableOfWorkbookSheetTable();
+
+    	tableOfTestData.export(".\\Evidencia\\TestData.txt");
+    	tableOfConfigRecType.export(".\\Evidencia\\ConfigRecType.txt");
+    	tableOfConfigRecField.export(".\\Evidencia\\ConfigRecField.txt");
+    	tableOfTableConfigCredencial.export(".\\Evidencia\\ConfigCredencial.txt");
+
+    	assertTrue( true );
+    }
+
  
     
 }

@@ -18,9 +18,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 /*
- * ExcelToJson class is responsible to convert a table on a Excel sheet
+ * ToJsonFromExcel class is responsible to convert a table on a Excel sheet
  * of an Workbook. The first row of sheet has the columns names, and the others
- * rows until end of sheet are data. ExcelToJson returns an object instance of
+ * rows until end of sheet are data. ToJsonFromExcel returns an object instance of
  * class JsonObject with Excel data
  * 
  * JsonObject Sample:
@@ -73,10 +73,13 @@ import com.google.gson.JsonObject;
  * 
  * 
  */
-public class ExcelToJson {
+public class ToJsonFromExcel {
 	
-	final static Logger logger = Logger.getLogger(ExcelToJson.class);
+	final static Logger logger = Logger.getLogger(ToJsonFromExcel.class);
 	
+	/*
+	 * Private properties ...
+	 */
 	private Workbook workbook;
 	private LinkedHashMap<String, Integer> tableColumns = new LinkedHashMap<String, Integer>();
 	private JsonObject jsonObjectWorkbook = new JsonObject();
@@ -96,8 +99,7 @@ public class ExcelToJson {
 	 * @param wbFilename  Workbook filename
 	 * 
 	 */
-	public ExcelToJson(String wbFilename) throws Exception {
-		// { "workbook": {"name": "c:\\sample.xls" } } }"
+	public ToJsonFromExcel(String wbFilename) throws Exception {
 		JsonObject jsonWorkbookName = new JsonObject();
 		jsonWorkbookName.addProperty("name", wbFilename);
 		jsonObjectWorkbook.add("workbook", jsonWorkbookName);
