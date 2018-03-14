@@ -6,11 +6,12 @@ Funcionalidade: Validação de arquivo de transações financeiras
   @TransacFinanc @TransacFinancArq @TransacFinancArqCrmpro @TransacFinancArqCrmpro
   Cenario: Validação de transações financeira planilha vs arquivo
     Dado Planilha com informações de validação do teste de transações financeiras
-           | planilha TestData validação                        |
-           | .\src\main\resources\testdata\crmpro\TestData.xlsx |
+           | planilha TestData validação                                           |
+           | .\src\main\resources\testdata\crmpro\TestData.xlsx                   |
     E Arquivo de transações financeiras
            | arquivo Transações Financeiras                        |
            | .\src\main\resources\testdata\crmpro\TestDataFile.txt |
+#           | .\src\main\resources\testdata\firstdata\0075120C_20180215_T134425.txt |
     E Planilha de configuração do layout de transações financeiras
            | planilha ConfigLayoutRecordType                                  | planilha ConfigLayoutRecordField                                  | planilha ConfigLayoutRecordSegment                                  |
            | .\src\main\resources\testdata\crmpro\ConfigLayoutRecordType.xlsx | .\src\main\resources\testdata\crmpro\ConfigLayoutRecordField.xlsx | .\src\main\resources\testdata\crmpro\ConfigLayoutRecordSegment.xlsx |

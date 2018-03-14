@@ -46,9 +46,9 @@ public class ValidacaoArquivoTransacaoFunctionality {
 	 */
 	private String ERRORMSG_OBJECT_UNDEFINED = new String("Error: Arquivo '%s' ainda não foi definido e não pode ser nulo!");
 	private String ERRORMSG_OBJECT_ALREADY_DEFINED = new String("Error: Objeto '%s' já foi definido com o valor de '%s' e não pode ser redefinido. Funcionalidade não está preparada para tratar uma lista deste atributo!");
-	private String ERRORMSG_FAIL_VALIDATION = new String("Error: Houve falhas na validação das transações financeiras!");
+	private String ERRORMSG_FAIL_VALIDATION = new String("Error: Houve falhas na validação das transações financeiras! Consulte os logs da automação para verificar os detalhes");
 	private String ERRORMSG_PASSED_SUCCESSFULLY = new String("Success: Validação ocorreu com sucesso!");
-	private String ERRORMSG_FAIL_CROSS_VALIDATON_JSON = new String("Fail: Elemento de validação no '%s' não foi encontrado!");
+	private String ERRORMSG_FAIL_CROSS_VALIDATON_JSON = new String("Fail: Elemento de validação não foi encontrado no '%s'!");
 	private String ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS = new String("Fail: Falha na comparação do valor do campo '%s' entre '%s' e '%s'!");
 	
 	private String STATUS_PASSED = new String("Passed");
@@ -236,6 +236,9 @@ public class ValidacaoArquivoTransacaoFunctionality {
 		// Execute Cross Validation ...
 		Boolean bRet = executeCrossValidation();
 		exportJsonToFile(this.jsonObjCrossValidationReport, "logs\\jsonObjCrossValidationReport.txt" );
+		
+		// Report CrossValidation();
+		reportCrossValidationExecution();
 
 		if (!bRet) {
 			throw new Exception(ERRORMSG_FAIL_VALIDATION);
@@ -508,18 +511,23 @@ public class ValidacaoArquivoTransacaoFunctionality {
 							String arquivo_arq0507HexaBigSequence = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0507HexaBigSequence").getAsString() );
 							String arquivo_arq0507RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0507RowNum").getAsString() );
 							
-							testdata_productCode = "0".concat(testdata_productCode);
+							testdata_productCode = "000".concat(testdata_productCode).substring("000".concat(testdata_productCode).length()-3, "000".concat(testdata_productCode).length());
 							testdata_valueDate = ((testdata_valueDate.substring(6, 10)).concat(testdata_valueDate.substring(3, 5)).concat(testdata_valueDate.substring(0, 2)) ); 
 							
 							if (!testdata_productCode.equals(arquivo_arq0501ProductCode)) {
 								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
-										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "productCode").replaceFirst("%s", "planilha validação").replaceFirst("", "arquivo"), 
+										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "productCode").replaceFirst("%s", "planilha validação").replaceFirst("%s", "arquivo"), 
 										"ProductCode: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_productCode).replaceFirst("%s", arquivo_arq0501ProductCode).replaceFirst("%s", arquivo_arq0501RecordType).replaceFirst("%s", arquivo_arq0501RowNum));
 								bReturn = false;
 							} else if (!testdata_terminalID.equals(arquivo_arq0501TerminalId)) {
 								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
-										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "terminalID").replaceFirst("%s", "planilha validação").replaceFirst("", "arquivo"), 
-										"ProductCode: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_terminalID).replaceFirst("%s", arquivo_arq0501TerminalId).replaceFirst("%s", arquivo_arq0501RecordType).replaceFirst("%s", arquivo_arq0501RowNum));
+										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "terminalID").replaceFirst("%s", "planilha validação").replaceFirst("%s", "arquivo"), 
+										"TerminalID: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_terminalID).replaceFirst("%s", arquivo_arq0501TerminalId).replaceFirst("%s", arquivo_arq0501RecordType).replaceFirst("%s", arquivo_arq0501RowNum));
+								bReturn = false;								
+							} else if (!testdata_valueDate.equals(arquivo_arq0500DtTransac)) {
+								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
+										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "valueDate").replaceFirst("%s", "planilha validação").replaceFirst("%s", "arquivo"), 
+										"ValueDate: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_valueDate).replaceFirst("%s", arquivo_arq0500DtTransac).replaceFirst("%s", arquivo_arq0500RecordType).replaceFirst("%s", arquivo_arq0500RowNum));
 								bReturn = false;								
 							} else {
 								// Passed
@@ -549,6 +557,33 @@ public class ValidacaoArquivoTransacaoFunctionality {
 		
 	}
 	
+	/**
+	 * jsonObjCrossValidationReport()
+	 * @param status
+	 * @param merchant
+	 * @param authorizationCode
+	 * @param summary
+	 * @param detail
+	 *
+{  
+   "CrossValidationReport":[  
+      {  
+         "Status":"Passed",
+         "Merchant":"67700001",
+         "Authorization Code":"Authorization Code",
+         "Summary":"",
+         "Detail":""
+      },
+      {  
+         "Status":"Failed",
+         "Merchant":"67700001",
+         "Authorization Code":"674537",
+         "Summary":"arquivoFail: Falha na comparação do valor do campo 'productCode' entre 'planilha validação' e '%s'!",
+         "Detail":"ProductCode: '073' x '070' (RecType: '0501', RowNum: 8)"
+      }
+   ]
+}	 * 
+	 */
 	private void jsonObjCrossValidationReport(String status, String merchant, String authorizationCode, String summary, String detail ) {
 		JsonObject jsonObjCrossValidationReportItem = new JsonObject();
 		
@@ -570,6 +605,31 @@ public class ValidacaoArquivoTransacaoFunctionality {
 		}
 	}
 
+	/**
+	 * reportCrossValidationExecution()
+	 */
+	private void reportCrossValidationExecution() {
+		// { "cross_validations": [ <jsonArrayCrossValidations> ] }  
+		JsonArray jsonArrayCrossValidationReport = this.jsonObjCrossValidationReport.getAsJsonArray("CrossValidationReport");
+		
+		if (jsonArrayCrossValidationReport!=null) {
+			if (jsonArrayCrossValidationReport.size()!=0) {
+				
+				// Iterate <jsonObjArrayItem> into <jsoArrayCrossValidation>
+				System.out.println( "Status | Merchant | AuthCode | Summary");
+				for (int i=0;i<jsonArrayCrossValidationReport.size();i++) {
+					
+					JsonObject jsonObjCrossValidationReportItem = ( (JsonObject) jsonArrayCrossValidationReport.get(i) );
+					
+					System.out.println(jsonObjCrossValidationReportItem.get("Status").getAsString() 
+							+   " | " + jsonObjCrossValidationReportItem.get("Merchant").getAsString() 
+							+   " | " + jsonObjCrossValidationReportItem.get("Authorization Code").getAsString() 
+							+ "   | " + jsonObjCrossValidationReportItem.get("Summary").getAsString() 
+							);
+				}
+			}
+		}
+	}
 
 
 }
