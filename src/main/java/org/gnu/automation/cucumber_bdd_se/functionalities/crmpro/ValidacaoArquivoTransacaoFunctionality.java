@@ -273,8 +273,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 				
 				RecordOf recordOfArquivo = tableOfArquivoTransacoesFinanceiras.get(j);
 				
-//				String arq0500RecordType = getStringValue(recordOfTestData.get("0500.RecordType"));				
-				
+//				String arq0500RecordType = getStringValue(recordOfTestData.get("0500.RecordType"));	
 				String arq0500RecordType = ( (recordOfTestData.get("0500.RecordType")!=null) ? recordOfTestData.get("0500.RecordType") : new String("") );
 				String arq0500DtTransac = ( (recordOfTestData.get("0500.DtTransac")!=null) ? recordOfTestData.get("0500.DtTransac") : new String("") );
 				String arq0500AuthorizationCode = ( (recordOfTestData.get("0500.AuthorizationCode")!=null) ? recordOfTestData.get("0500.AuthorizationCode") : new String("") );
@@ -333,7 +332,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 				
 	}
 	
-	public static String getStringValue(String value) {
+	private static String getStringValue(String value) {
 		
 		if (value == null) {
 			return "";
