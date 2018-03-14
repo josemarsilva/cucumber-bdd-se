@@ -45,6 +45,18 @@ public class ValidacaoArquivoTransacaoStep {
 		}
 		return true;
 	}
+	
+	@E("^Planilha de configuração de credenciais de acesso aos sistemas$")
+	public boolean planilhaConfigCredencialAcessoSistemas(DataTable configPlanLayout) throws Throwable {
+		System.out.println("E planilhaConfigCredencialAcessoSistemas()");
+		for (Map<String, String> map : configPlanLayout.asMaps(String.class, String.class)) {
+			validacaoArquivoTransacaoFunctionality.setPlanilhaConfigCredencialAcessoSistema(
+					map.get("planilha ConfigCredencial")
+					);
+		}
+		return true;
+	}
+
 
 	@Quando("^Eu buscar no arquivo de transações financeiras a transação correspondente com as informações para validação$")
 	public boolean euBuscarArquivoTransacaoFinanceiraCorrespondente() throws Throwable {
@@ -53,10 +65,26 @@ public class ValidacaoArquivoTransacaoStep {
 		return true;
 	}
 	
-	@Entao("^Eu valido as informações de transação finaceiras do arquivo$")
-	public boolean euValidoInfoTransacaoFinanceiraArquivo() throws Throwable {
-		System.out.println("Entao euValidoInfoTransacaoFinanceiraArquivo()");
+	@Quando("^Eu buscar no site CrmPro a transação correspondente com as informações para validação$")
+	public boolean euBuscarSiteCrmProTransacaoCorrespondente() throws Throwable {
+		System.out.println("E euBuscarSiteCrmProTransacaoCorrespondente()");
+		validacaoArquivoTransacaoFunctionality.buscarSiteCrmProTransacaoCorrespondente();
 		return true;
+	}
+	
+	
+	@Quando("^Eu buscar no site Redmine a transação correspondente com as informações para validação$")
+	public boolean euBuscarSiteRedmineTransacaoCorrespondente() throws Throwable {
+		System.out.println("E euBuscarSiteRedmineTransacaoCorrespondente()");
+		validacaoArquivoTransacaoFunctionality.buscarSiteRedmineTransacaoCorrespondente();
+		return true;
+	}
+	
+	
+	@Entao("^Eu valido todas as informações de transações financeiras$")
+	public void euValidoTodasInformacoesTransacoesFinanceiras() throws Throwable {
+		System.out.println("Entao euValidoTodasInformacoesTransacoesFinanceiras()");
+		validacaoArquivoTransacaoFunctionality.validarTodasInformacoesTransacoesFinanceiras();
 	}
 	
 }
