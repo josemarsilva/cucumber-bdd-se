@@ -3,7 +3,7 @@
 #Encoding: iso-8859-1
 Funcionalidade: Validação de arquivo de transações financeiras
 
-  @Crmpro @TransacaoFinanceira @PlanilhaVsArquivo @CrmproTransacFinancPlanVsArq
+  @TransacFinanc @TransacFinancArq @TransacFinancArqCrmpro @TransacFinancArqCrmpro
   Cenario: Validação de transações financeira planilha vs arquivo
     Dado Planilha com informações de validação do teste de transações financeiras
            | planilha TestData validação                        |

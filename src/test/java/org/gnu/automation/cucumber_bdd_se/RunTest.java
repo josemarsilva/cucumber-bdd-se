@@ -17,7 +17,7 @@ import cucumber.api.junit.Cucumber;
 				"org.gnu.automation.cucumber_bdd_se.steps"
 				}, 
 		tags = { 
-				"@CrmproTransacFinancPlanVsArq"
+				"@TransacFinancArqCrmpro"
 				}
 		)
 
