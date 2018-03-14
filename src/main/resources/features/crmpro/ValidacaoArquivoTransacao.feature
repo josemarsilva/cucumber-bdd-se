@@ -18,6 +18,6 @@ Funcionalidade: Validação de arquivo de transações financeiras
            | planilha ConfigCredencial                                  |
            | .\src\main\resources\testdata\crmpro\ConfigCredencial.xlsx |
     Quando Eu buscar no arquivo de transações financeiras a transação correspondente com as informações para validação
-    E Eu buscar no site CrmPro a transação correspondente com as informações para validação
-    E Eu buscar no site Redmine a transação correspondente com as informações para validação
+#    E Eu buscar no site CrmPro a transação correspondente com as informações para validação
+#    E Eu buscar no site Redmine a transação correspondente com as informações para validação
     Entao Eu valido todas as informações de transações financeiras

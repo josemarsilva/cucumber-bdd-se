@@ -56,7 +56,9 @@ public class WebDriverFactory {
 
 	@After
 	public static void tearDown() {
-		driver.close();
+		if (driver!=null) {
+			driver.close();
+		}
 	}
 
 	

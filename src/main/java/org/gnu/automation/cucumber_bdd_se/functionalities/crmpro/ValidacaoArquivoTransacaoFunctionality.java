@@ -1,5 +1,10 @@
 package org.gnu.automation.cucumber_bdd_se.functionalities.crmpro;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.gnu.automation.cucumber_bdd_se.util.FileTable;
 import org.gnu.automation.cucumber_bdd_se.util.RecordOf;
 import org.gnu.automation.cucumber_bdd_se.util.TableOf;
@@ -31,9 +36,10 @@ public class ValidacaoArquivoTransacaoFunctionality {
 	private TableOf tableOfArquivoTransacoesFinanceiras = null;
 	private TableOf tableOfConfigCredencial = null;
 
-	private WebDriver driver;
+	private WebDriver driver = null;
 	
-	JsonObject jsonObjCrossValidation = new JsonObject();
+	JsonObject jsonObjCrossValidationData = new JsonObject(); // see specification on buildCrossValidationJson()
+	JsonObject jsonObjCrossValidationReport = new JsonObject(); // see specification on jsonObjCrossValidationReport()
 	
 	/*
 	 * Private Error messages ...
@@ -41,6 +47,12 @@ public class ValidacaoArquivoTransacaoFunctionality {
 	private String ERRORMSG_OBJECT_UNDEFINED = new String("Error: Arquivo '%s' ainda não foi definido e não pode ser nulo!");
 	private String ERRORMSG_OBJECT_ALREADY_DEFINED = new String("Error: Objeto '%s' já foi definido com o valor de '%s' e não pode ser redefinido. Funcionalidade não está preparada para tratar uma lista deste atributo!");
 	private String ERRORMSG_FAIL_VALIDATION = new String("Error: Houve falhas na validação das transações financeiras!");
+	private String ERRORMSG_PASSED_SUCCESSFULLY = new String("Success: Validação ocorreu com sucesso!");
+	private String ERRORMSG_FAIL_CROSS_VALIDATON_JSON = new String("Fail: Elemento de validação no '%s' não foi encontrado!");
+	private String ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS = new String("Fail: Falha na comparação do valor do campo '%s' entre '%s' e '%s'!");
+	
+	private String STATUS_PASSED = new String("Passed");
+	private String STATUS_FAILED = new String("Failed");
 	
 	
 	
@@ -217,21 +229,76 @@ public class ValidacaoArquivoTransacaoFunctionality {
 		tableOfArquivoTransacoesFinanceiras.export("logs\\tableOfArquivoTransacoesFinanceiras.csv");
 		tableOfConfigCredencial.export("logs\\tableOfConfigCredencial.csv");
 		
-		// Cross validation ...
+		// Build Cross Validation Json ...
 		buildCrossValidationJson();
+		exportJsonToFile(this.jsonObjCrossValidationData, "logs\\jsonObjCrossValidationData.txt" );
 		
-		if (false) {
+		// Execute Cross Validation ...
+		Boolean bRet = executeCrossValidation();
+		exportJsonToFile(this.jsonObjCrossValidationReport, "logs\\jsonObjCrossValidationReport.txt" );
+
+		if (!bRet) {
 			throw new Exception(ERRORMSG_FAIL_VALIDATION);
 			
 		}
 		
 	}
 	
-	
+
+	/*
+	 * buildCrossValidationJson() - Build a Cross Validation JSON
+	 * 
+{
+  "cross_validations":
+  [
+    {
+      "testdata":
+      {
+        "productCode": "productCode",
+        "amount": "amount",
+        "valueDate": "valueDate",
+        "installment": "installment",
+        "authorizationCode": "authorizationCode",
+        "terminalID": "terminalID",
+        "captureMethod": "captureMethod",
+        "merchantName": "merchantName"
+      },
+      "arquivo":
+      {
+        "arq0500RecordType": "arq0500RecordType",
+        "arq0500DtTransac": "arq0500DtTransac",
+        "arq0500AuthorizationCode": "arq0500AuthorizationCode",
+        "arq0500RowNum": "arq0500RowNum",
+        "arq0501RecordType": "arq0501RecordType",
+        "arq0501ProductCode": "arq0501ProductCode",
+        "arq0501Merchant": "arq0501Merchant",
+        "arq0501TerminalId": "arq0501TerminalId",
+        "arq0501RowNum": "arq0501RowNum",
+        "arq0502RecordType": "arq0502RecordType",
+        "arq0502Country": "arq0502Country",
+        "arq0502RowNum": "arq0502RowNum",
+        "arq0505RecordType": "arq0505RecordType",
+        "arq0505DecimalBigSequence": "arq0505DecimalBigSequence",
+        "arq0505RowNum": "arq0505RowNum",
+        "arq0507RecordType": "arq0507RecordType",
+        "arq0507HexaBigSequence": "arq0507HexaBigSequence",
+        "arq0507RowNum": "arq0507RowNum"
+      },
+      "webapp":
+      {
+          "company_name": "company_name",
+          "company_website": "http://wwww.company_name.com",
+          "company_evidence": "YYYYMMDDHHMMSSSS.jpg"
+      }
+   }
+  ]
+}
+	 * 
+	 */
 	private void buildCrossValidationJson() throws Exception {
 		
-		// JsonArray TestData
-		JsonArray jsonArrayTestData = new JsonArray();
+		// JsonArray jsonArrayCrossValidations
+		JsonArray jsonArrayCrossValidations = new JsonArray();
 		
 		// Nested Loop on TestData ...
 		
@@ -250,95 +317,257 @@ public class ValidacaoArquivoTransacaoFunctionality {
 			String terminalID = ( (recordOfTestData.get("Terminal ID")!=null) ? recordOfTestData.get("Terminal ID") : new String("") );
 			String captureMethod = ( (recordOfTestData.get("Capture Method")!=null) ? recordOfTestData.get("Capture Method") : new String("") );
 			String merchantName = ( (recordOfTestData.get("Merchant Name")!=null) ? recordOfTestData.get("Merchant Name") : new String("") );
+			String merchantWebSite = ( (recordOfTestData.get("Merchant Web Site")!=null) ? recordOfTestData.get("Merchant Web Site") : new String("") );
 			
-			// JsonObject TestData
+			// JsonObjects ...
+			JsonObject jsonObjArrayItem = new JsonObject();
 			JsonObject jsonObjTestData = new JsonObject();
-			jsonObjTestData.addProperty("cardScheme ", cardScheme );
-			jsonObjTestData.addProperty("merchant ", merchant );
-			jsonObjTestData.addProperty("productCode ", productCode );
-			jsonObjTestData.addProperty("amount ", amount );
-			jsonObjTestData.addProperty("valueDate ", valueDate );
-			jsonObjTestData.addProperty("installment ", installment );
-			jsonObjTestData.addProperty("authorizationCode ", authorizationCode );
-			jsonObjTestData.addProperty("terminalID ", terminalID );
-			jsonObjTestData.addProperty("captureMethod ", captureMethod );
-			jsonObjTestData.addProperty("merchantName ", merchantName );
+			JsonObject jsonObjArquivo = new JsonObject();
+			JsonObject jsonObjWebapp = new JsonObject();
 			
-			// JsonArray TestData->Arquivo
-			JsonArray jsonArrayArquivo = new JsonArray();
+			// Fill jsonObjTestData ...
+			
+			jsonObjTestData.addProperty("cardScheme", cardScheme );
+			jsonObjTestData.addProperty("merchant", merchant );
+			jsonObjTestData.addProperty("productCode", productCode );
+			jsonObjTestData.addProperty("amount", amount );
+			jsonObjTestData.addProperty("valueDate", valueDate );
+			jsonObjTestData.addProperty("installment", installment );
+			jsonObjTestData.addProperty("authorizationCode", authorizationCode );
+			jsonObjTestData.addProperty("terminalID", terminalID );
+			jsonObjTestData.addProperty("captureMethod", captureMethod );
+			jsonObjTestData.addProperty("merchantName", merchantName );
+			jsonObjTestData.addProperty("merchantWebSite", merchantWebSite );
+			
+			// Nested Loop Arquivo ...
 			
 			for (int j=0;j<this.tableOfArquivoTransacoesFinanceiras.size();j++) {
 				
 				// Get each recordOf from tableOfArquivoTransacoesFinanceiras ...
 				
 				RecordOf recordOfArquivo = tableOfArquivoTransacoesFinanceiras.get(j);
-				
-//				String arq0500RecordType = getStringValue(recordOfTestData.get("0500.RecordType"));	
-				String arq0500RecordType = ( (recordOfTestData.get("0500.RecordType")!=null) ? recordOfTestData.get("0500.RecordType") : new String("") );
-				String arq0500DtTransac = ( (recordOfTestData.get("0500.DtTransac")!=null) ? recordOfTestData.get("0500.DtTransac") : new String("") );
-				String arq0500AuthorizationCode = ( (recordOfTestData.get("0500.AuthorizationCode")!=null) ? recordOfTestData.get("0500.AuthorizationCode") : new String("") );
-				String arq0500RowNum = ( (recordOfTestData.get("0500.RowNum")!=null) ? recordOfTestData.get("0500.RowNum") : new String("") );
-				String arq0501RecordType = ( (recordOfTestData.get("0501.RecordType")!=null) ? recordOfTestData.get("0501.RecordType") : new String("") );
-				String arq0501ProductCode = ( (recordOfTestData.get("0501.ProductCode")!=null) ? recordOfTestData.get("0501.ProductCode") : new String("") );
-				String arq0501Merchant = ( (recordOfTestData.get("0501.Merchant")!=null) ? recordOfTestData.get("0501.Merchant") : new String("") );
-				String arq0501TerminalId = ( (recordOfTestData.get("0501.TerminalId")!=null) ? recordOfTestData.get("0501.TerminalId") : new String("") );
-				String arq0501RowNum = ( (recordOfTestData.get("0501.RowNum")!=null) ? recordOfTestData.get("0501.RowNum") : new String("") );
-				String arq0502RecordType = ( (recordOfTestData.get("0502.RecordType")!=null) ? recordOfTestData.get("0502.RecordType") : new String("") );
-				String arq0502Country = ( (recordOfTestData.get("0502.Country")!=null) ? recordOfTestData.get("0502.Country") : new String("") );
-				String arq0502RowNum = ( (recordOfTestData.get("0502.RowNum")!=null) ? recordOfTestData.get("0502.RowNum") : new String("") );
-				String arq0505RecordType = ( (recordOfTestData.get("0505.RecordType")!=null) ? recordOfTestData.get("0505.RecordType") : new String("") );
-				String arq0505DecimalBigSequence = ( (recordOfTestData.get("0505.DecimalBigSequence")!=null) ? recordOfTestData.get("0505.DecimalBigSequence") : new String("") );
-				String arq0505RowNum = ( (recordOfTestData.get("0505.RowNum")!=null) ? recordOfTestData.get("0505.RowNum") : new String("") );
-				String arq0507RecordType = ( (recordOfTestData.get("0507.RecordType")!=null) ? recordOfTestData.get("0507.RecordType") : new String("") );
-				String arq0507HexaBigSequence = ( (recordOfTestData.get("0507.HexaBigSequence")!=null) ? recordOfTestData.get("0507.HexaBigSequence") : new String("") );
-				String arq0507RowNum = ( (recordOfTestData.get("0507.RowNum")!=null) ? recordOfTestData.get("0507.RowNum") : new String("") );
+				String arq0500RecordType = ( (recordOfArquivo.get("0500.RecordType")!=null) ? recordOfArquivo.get("0500.RecordType") : new String("") ); // String arq0500RecordType = getStringValue(recordOfArquivo.get("0500.RecordType"));
+				String arq0500DtTransac = ( (recordOfArquivo.get("0500.DtTransac")!=null) ? recordOfArquivo.get("0500.DtTransac") : new String("") );
+				String arq0500AuthorizationCode = ( (recordOfArquivo.get("0500.AuthorizationCode")!=null) ? recordOfArquivo.get("0500.AuthorizationCode") : new String("") );
+				String arq0500RowNum = ( (recordOfArquivo.get("0500.RowNum")!=null) ? recordOfArquivo.get("0500.RowNum") : new String("") );
+				String arq0501RecordType = ( (recordOfArquivo.get("0501.RecordType")!=null) ? recordOfArquivo.get("0501.RecordType") : new String("") );
+				String arq0501ProductCode = ( (recordOfArquivo.get("0501.ProductCode")!=null) ? recordOfArquivo.get("0501.ProductCode") : new String("") );
+				String arq0501Merchant = ( (recordOfArquivo.get("0501.Merchant")!=null) ? recordOfArquivo.get("0501.Merchant") : new String("") );
+				String arq0501TerminalId = ( (recordOfArquivo.get("0501.TerminalId")!=null) ? recordOfArquivo.get("0501.TerminalId") : new String("") );
+				String arq0501RowNum = ( (recordOfArquivo.get("0501.RowNum")!=null) ? recordOfArquivo.get("0501.RowNum") : new String("") );
+				String arq0502RecordType = ( (recordOfArquivo.get("0502.RecordType")!=null) ? recordOfArquivo.get("0502.RecordType") : new String("") );
+				String arq0502Country = ( (recordOfArquivo.get("0502.Country")!=null) ? recordOfArquivo.get("0502.Country") : new String("") );
+				String arq0502RowNum = ( (recordOfArquivo.get("0502.RowNum")!=null) ? recordOfArquivo.get("0502.RowNum") : new String("") );
+				String arq0505RecordType = ( (recordOfArquivo.get("0505.RecordType")!=null) ? recordOfArquivo.get("0505.RecordType") : new String("") );
+				String arq0505DecimalBigSequence = ( (recordOfArquivo.get("0505.DecimalBigSequence")!=null) ? recordOfArquivo.get("0505.DecimalBigSequence") : new String("") );
+				String arq0505RowNum = ( (recordOfArquivo.get("0505.RowNum")!=null) ? recordOfArquivo.get("0505.RowNum") : new String("") );
+				String arq0507RecordType = ( (recordOfArquivo.get("0507.RecordType")!=null) ? recordOfArquivo.get("0507.RecordType") : new String("") );
+				String arq0507HexaBigSequence = ( (recordOfArquivo.get("0507.HexaBigSequence")!=null) ? recordOfArquivo.get("0507.HexaBigSequence") : new String("") );
+				String arq0507RowNum = ( (recordOfArquivo.get("0507.RowNum")!=null) ? recordOfArquivo.get("0507.RowNum") : new String("") );
 				
 				// LEFT OUTER JOIN tableOfTestDataValidacao -> tableOfArquivoTransacoesFinanceiras
 				
 				if (merchant.equals(arq0501Merchant) && authorizationCode.equals(arq0500AuthorizationCode)) {
 					
-					// JsonObject Arquivo ...
+					// Fill jsonObjArquivo ...
 					
-					JsonObject jsonObjArquivo = new JsonObject();
-					jsonObjTestData.addProperty("arq0500RecordType ", arq0500RecordType );
-					jsonObjTestData.addProperty("arq0500DtTransac ", arq0500DtTransac );
-					jsonObjTestData.addProperty("arq0500AuthorizationCode ", arq0500AuthorizationCode );
-					jsonObjTestData.addProperty("arq0500RowNum ", arq0500RowNum );
-					jsonObjTestData.addProperty("arq0501RecordType ", arq0501RecordType );
-					jsonObjTestData.addProperty("arq0501ProductCode ", arq0501ProductCode );
-					jsonObjTestData.addProperty("arq0501Merchant ", arq0501Merchant );
-					jsonObjTestData.addProperty("arq0501TerminalId ", arq0501TerminalId );
-					jsonObjTestData.addProperty("arq0501RowNum ", arq0501RowNum );
-					jsonObjTestData.addProperty("arq0502RecordType ", arq0502RecordType );
-					jsonObjTestData.addProperty("arq0502Country ", arq0502Country );
-					jsonObjTestData.addProperty("arq0502RowNum ", arq0502RowNum );
-					jsonObjTestData.addProperty("arq0505RecordType ", arq0505RecordType );
-					jsonObjTestData.addProperty("arq0505DecimalBigSequence ", arq0505DecimalBigSequence );
-					jsonObjTestData.addProperty("arq0505RowNum ", arq0505RowNum );
-					jsonObjTestData.addProperty("arq0507RecordType ", arq0507RecordType );
-					jsonObjTestData.addProperty("arq0507HexaBigSequence ", arq0507HexaBigSequence );
-					jsonObjTestData.addProperty("arq0507RowNum ", arq0507RowNum );
+					jsonObjArquivo.addProperty("arq0500RecordType", arq0500RecordType );
+					jsonObjArquivo.addProperty("arq0500DtTransac", arq0500DtTransac );
+					jsonObjArquivo.addProperty("arq0500AuthorizationCode", arq0500AuthorizationCode );
+					jsonObjArquivo.addProperty("arq0500RowNum", arq0500RowNum );
+					jsonObjArquivo.addProperty("arq0501RecordType", arq0501RecordType );
+					jsonObjArquivo.addProperty("arq0501ProductCode", arq0501ProductCode );
+					jsonObjArquivo.addProperty("arq0501Merchant", arq0501Merchant );
+					jsonObjArquivo.addProperty("arq0501TerminalId", arq0501TerminalId );
+					jsonObjArquivo.addProperty("arq0501RowNum", arq0501RowNum );
+					jsonObjArquivo.addProperty("arq0502RecordType", arq0502RecordType );
+					jsonObjArquivo.addProperty("arq0502Country", arq0502Country );
+					jsonObjArquivo.addProperty("arq0502RowNum", arq0502RowNum );
+					jsonObjArquivo.addProperty("arq0505RecordType", arq0505RecordType );
+					jsonObjArquivo.addProperty("arq0505DecimalBigSequence", arq0505DecimalBigSequence );
+					jsonObjArquivo.addProperty("arq0505RowNum", arq0505RowNum );
+					jsonObjArquivo.addProperty("arq0507RecordType", arq0507RecordType );
+					jsonObjArquivo.addProperty("arq0507HexaBigSequence", arq0507HexaBigSequence );
+					jsonObjArquivo.addProperty("arq0507RowNum", arq0507RowNum );
 					
-					// Add JsonObject to JsonArray ... 
-					jsonArrayArquivo.add(jsonObjArquivo);
+					// TestData 1:(0,1) Arquivo
+					break;
+					
 				}
-				
 			}
 			
-			// Add JsonArray to parent ... 
-			jsonObjTestData.add("arquivos", jsonArrayArquivo);
+			// add { <jsonObjTestData>, <jsonObjArquivo>, <jsonObjWebapp> } to jsonObjArrayItem ...
+			if (jsonObjTestData!=null) {
+				if (jsonObjTestData.size()!=0) {
+					// "testdata":
+					jsonObjArrayItem.add("testdata", jsonObjTestData);
+					// "arquivo":
+					if (jsonObjArquivo!=null) {
+						if (jsonObjArquivo.size()!=0) {
+							jsonObjArrayItem.add("arquivo", jsonObjArquivo);
+						}
+					}
+					// "webapp":
+					if (jsonObjWebapp!=null) {
+						if (jsonObjWebapp.size()!=0) {
+							jsonObjArrayItem.add("webapp", jsonObjWebapp);
+						}
+					}
+				}
+			}
+			
+			// add jsonObjArrayItem to jsonArrayCrossValidations
+			jsonArrayCrossValidations.add(jsonObjArrayItem);
 			
 		}
-				
+		
+		// Fill jsonObjCrossValidation { "cross_validations": [ <jsonArrayCrossValidations> ] } ...
+		this.jsonObjCrossValidationData.add("cross_validations", jsonArrayCrossValidations);
+		
 	}
 	
 	private static String getStringValue(String value) {
-		
 		if (value == null) {
 			return "";
 		}
-		
 		return value;
+	}
+	
+	/**
+	 * exportJsonToFile(jsonObj,exportFileName) - Export content of jsonObj to file exportFileName
+	 * 
+	 * @param jsonObj  - Json object to be exported
+	 * @param exportFileName  - filename where to place content
+	 */
+	private void exportJsonToFile(JsonObject jsonObj, String exportFileName) throws IOException {
+		if (exportFileName!=null) {
+			if (!exportFileName.equals("")) {
+				File exportFile = new File(exportFileName);
+				BufferedWriter writer = new BufferedWriter(new FileWriter(exportFile));
+				if (jsonObj!=null) {
+					if (jsonObj.size()!=0) {
+						String jsonString = jsonObj.toString();
+						writer.write(jsonString);
+					}
+				}
+				writer.close();
+			}
+		}		
+	}
+
+	private boolean executeCrossValidation()  throws Exception {
+		
+		Boolean bReturn = true;
+		
+		// { "cross_validations": [ <jsonArrayCrossValidations> ] }  
+		JsonArray jsonArrayCrossValidations = this.jsonObjCrossValidationData.getAsJsonArray("cross_validations");
+		
+		if (jsonArrayCrossValidations!=null) {
+			if (jsonArrayCrossValidations.size()!=0) {
+				
+				// Iterate <jsonObjArrayItem> into <jsoArrayCrossValidation>
+				for (int i=0;i<jsonArrayCrossValidations.size();i++) {
+					
+					JsonObject jsonObjArrayItem = ( (JsonObject) jsonArrayCrossValidations.get(i) );
+					
+					Boolean bHasTestdata = jsonObjArrayItem.has("testdata");
+					Boolean bHasArquivo = jsonObjArrayItem.has("arquivo");
+					
+					if (bHasTestdata) {
+						
+						String testdata_CardScheme = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("cardScheme").getAsString() );
+						String testdata_merchant = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("merchant").getAsString() );
+						String testdata_productCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("productCode").getAsString() );
+						String testdata_pmount = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("amount").getAsString() );
+						String testdata_valueDate = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("valueDate").getAsString() );
+						String testdata_installment = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("installment").getAsString() );
+						String testdata_authorizationCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("authorizationCode").getAsString() );
+						String testdata_terminalID = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("terminalID").getAsString() );
+						String testdata_captureMethod = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("captureMethod").getAsString() );
+						String testdata_merchantName = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("merchantName").getAsString() );
+						String testdata_merchantWebSite = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("merchantWebSite").getAsString() );
+						
+						if (bHasArquivo) {
+							
+							String arquivo_arq0500RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500RecordType").getAsString() );
+							String arquivo_arq0500DtTransac = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500DtTransac").getAsString() );
+							String arquivo_arq0500AuthorizationCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500AuthorizationCode").getAsString() );
+							String arquivo_arq0500RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500RowNum").getAsString() );
+							String arquivo_arq0501RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501RecordType").getAsString() );
+							String arquivo_arq0501ProductCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501ProductCode").getAsString() );
+							String arquivo_arq0501Merchant = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501Merchant").getAsString() );
+							String arquivo_arq0501TerminalId = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501TerminalId").getAsString() );
+							String arquivo_arq0501RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501RowNum").getAsString() );
+							String arquivo_arq0502RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0502RecordType").getAsString() );
+							String arquivo_arq0502Country = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0502Country").getAsString() );
+							String arquivo_arq0502RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0502RowNum").getAsString() );
+							String arquivo_arq0505RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0505RecordType").getAsString() );
+							String arquivo_arq0505DecimalBigSequence = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0505DecimalBigSequence").getAsString() );
+							String arquivo_arq0505RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0505RowNum").getAsString() );
+							String arquivo_arq0507RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0507RecordType").getAsString() );
+							String arquivo_arq0507HexaBigSequence = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0507HexaBigSequence").getAsString() );
+							String arquivo_arq0507RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0507RowNum").getAsString() );
+							
+							testdata_productCode = "0".concat(testdata_productCode);
+							testdata_valueDate = ((testdata_valueDate.substring(6, 10)).concat(testdata_valueDate.substring(3, 5)).concat(testdata_valueDate.substring(0, 2)) ); 
+							
+							if (!testdata_productCode.equals(arquivo_arq0501ProductCode)) {
+								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
+										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "productCode").replaceFirst("%s", "planilha validação").replaceFirst("", "arquivo"), 
+										"ProductCode: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_productCode).replaceFirst("%s", arquivo_arq0501ProductCode).replaceFirst("%s", arquivo_arq0501RecordType).replaceFirst("%s", arquivo_arq0501RowNum));
+								bReturn = false;
+							} else if (!testdata_terminalID.equals(arquivo_arq0501TerminalId)) {
+								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
+										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "terminalID").replaceFirst("%s", "planilha validação").replaceFirst("", "arquivo"), 
+										"ProductCode: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_terminalID).replaceFirst("%s", arquivo_arq0501TerminalId).replaceFirst("%s", arquivo_arq0501RecordType).replaceFirst("%s", arquivo_arq0501RowNum));
+								bReturn = false;								
+							} else {
+								// Passed
+								jsonObjCrossValidationReport(STATUS_PASSED, testdata_merchant, testdata_authorizationCode, "", "");
+							}
+							
+							
+						} else {
+							jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "arquivo"), "");
+							bReturn = false;
+						}
+						
+					} else {
+						jsonObjCrossValidationReport(STATUS_FAILED, "", "", ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "testdata"), "");
+						bReturn = false;
+					}
+										
+					
+				}
+				
+				
+				// { "testdata":{ <jsonObjTestData>, "arquivo":{ <jsonObjArquivo> } }  
+			}
+		}
+		
+		return bReturn;
+		
+	}
+	
+	private void jsonObjCrossValidationReport(String status, String merchant, String authorizationCode, String summary, String detail ) {
+		JsonObject jsonObjCrossValidationReportItem = new JsonObject();
+		
+		jsonObjCrossValidationReportItem.addProperty("Status", status);
+		jsonObjCrossValidationReportItem.addProperty("Merchant", merchant);
+		jsonObjCrossValidationReportItem.addProperty("Authorization Code", authorizationCode);
+		jsonObjCrossValidationReportItem.addProperty("Summary", summary);
+		jsonObjCrossValidationReportItem.addProperty("Detail", detail);
+		
+		if (this.jsonObjCrossValidationReport!=null) {
+			JsonArray jsonArrayCrossValidationReport = null;
+			if (this.jsonObjCrossValidationReport.has("CrossValidationReport")) {
+				jsonArrayCrossValidationReport = this.jsonObjCrossValidationReport.getAsJsonArray("CrossValidationReport");
+			} else  {
+				jsonArrayCrossValidationReport = new JsonArray();
+				jsonObjCrossValidationReport.add("CrossValidationReport", jsonArrayCrossValidationReport);
+			}
+			jsonArrayCrossValidationReport.add(jsonObjCrossValidationReportItem);
+		}
 	}
 
 
