@@ -38,6 +38,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 	private TableOf tableOfConfigLayoutRecSegment = new TableOf();
 	private TableOf tableOfArquivoTransacoesFinanceiras = null;
 	private TableOf tableOfConfigCredencial = null;
+	private TableOf tableOfMerchantPortalDetails = new TableOf();
 
 	private WebDriver driver = null;
 	
@@ -201,8 +202,9 @@ public class ValidacaoArquivoTransacaoFunctionality {
 			RecordOf recordOfTestData = tableOfTestDataValidacao.get(i);
 			String merchant = ( (recordOfTestData.get("Merchant")!=null) ? recordOfTestData.get("Merchant") : new String("") );
 			String valueDate = ( (recordOfTestData.get("Value Date")!=null) ? recordOfTestData.get("Value Date") : new String("") );
+			String installment = ( (recordOfTestData.get("Installment")!=null) ? recordOfTestData.get("Installment") : new String("") );
 			valueDate = ( (valueDate.length()> 10) ) ? valueDate.substring(0, 10) : valueDate;
-			strListReturn.add(merchant + ";" + valueDate);
+			strListReturn.add(merchant + ";" + installment + ";"+ valueDate);
 		}
 		return strListReturn;
 	}
@@ -247,6 +249,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 		tableOfConfigLayoutRecSegment.export("logs\\tableOfConfigLayoutRecSegment.csv");
 		tableOfArquivoTransacoesFinanceiras.export("logs\\tableOfArquivoTransacoesFinanceiras.csv");
 		tableOfConfigCredencial.export("logs\\tableOfConfigCredencial.csv");
+		tableOfMerchantPortalDetails.export("logs\\tableOfMerchantPortalDetails.csv");
 		
 		// Build Cross Validation Json ...
 		buildCrossValidationJson();
@@ -306,10 +309,9 @@ public class ValidacaoArquivoTransacaoFunctionality {
         "arq0507HexaBigSequence": "arq0507HexaBigSequence",
         "arq0507RowNum": "arq0507RowNum"
       },
-      "webapp":
+      "merchant_portal":
       {
-          "company_name": "company_name",
-          "company_website": "http://wwww.company_name.com",
+          "MerchantId": "MerchantId",
           "company_evidence": "YYYYMMDDHHMMSSSS.jpg"
       }
    }
@@ -416,6 +418,32 @@ public class ValidacaoArquivoTransacaoFunctionality {
 					
 					// TestData 1:(0,1) Arquivo
 					break;
+					
+				}
+			}
+			
+			// Nested Loop Arquivo ...
+			
+			for (int j=0;j<this.tableOfMerchantPortalDetails.size();j++) {
+				
+				// Get each recordOf from tableOfArquivoTransacoesFinanceiras ...
+				
+				RecordOf recordOfArquivo = tableOfMerchantPortalDetails.get(j);
+				String merchantPortalMerchantId = ( (recordOfArquivo.get("MerchantId")!=null) ? recordOfArquivo.get("MerchantId") : new String("") );
+				String merchantPortalAuthCode = ( (recordOfArquivo.get("AuthCode")!=null) ? recordOfArquivo.get("AuthCode") : new String("") );
+				String merchantPortalInstalmentNumberPlan = ( (recordOfArquivo.get("InstalmentNumberPlan")!=null) ? recordOfArquivo.get("InstalmentNumberPlan") : new String("") );
+				String merchantPortalGrossAmount = ( (recordOfArquivo.get("GrossAmount")!=null) ? recordOfArquivo.get("GrossAmount") : new String("") );
+				
+				// LEFT OUTER JOIN tableOfTestDataValidacao -> tableOfMerchantPortalDetails
+				
+				if (merchant.equals(merchantPortalMerchantId) && authorizationCode.equals(merchantPortalAuthCode)) {
+					
+					// Fill jsonObjArquivo ...
+					
+					jsonObjWebapp.addProperty("merchantPortalMerchantId", merchantPortalMerchantId );
+					jsonObjWebapp.addProperty("merchantPortalAuthCode", merchantPortalAuthCode );
+					jsonObjWebapp.addProperty("merchantPortalInstalmentNumberPlan", merchantPortalInstalmentNumberPlan );
+					jsonObjWebapp.addProperty("merchantPortalGrossAmount", merchantPortalGrossAmount );
 					
 				}
 			}
