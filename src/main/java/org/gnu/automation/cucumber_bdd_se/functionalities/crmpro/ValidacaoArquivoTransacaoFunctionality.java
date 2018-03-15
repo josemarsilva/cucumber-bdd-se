@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 import org.gnu.automation.cucumber_bdd_se.util.FileTable;
 import org.gnu.automation.cucumber_bdd_se.util.RecordOf;
@@ -48,7 +49,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 	private String ERRORMSG_OBJECT_ALREADY_DEFINED = new String("Error: Objeto '%s' já foi definido com o valor de '%s' e não pode ser redefinido. Funcionalidade não está preparada para tratar uma lista deste atributo!");
 	private String ERRORMSG_FAIL_VALIDATION = new String("Error: Houve falhas na validação das transações financeiras! Consulte os logs da automação para verificar os detalhes");
 	private String ERRORMSG_PASSED_SUCCESSFULLY = new String("Success: Validação ocorreu com sucesso!");
-	private String ERRORMSG_FAIL_CROSS_VALIDATON_JSON = new String("Fail: Elemento de validação não foi encontrado no '%s'!");
+	private String ERRORMSG_FAIL_CROSS_VALIDATON_JSON = new String("Fail: Elemento de validação '%s' não foi encontrado no '%s'!");
 	private String ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS = new String("Fail: Falha na comparação do valor do campo '%s' entre '%s' e '%s'!");
 	
 	private String STATUS_PASSED = new String("Passed");
@@ -352,6 +353,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 				String arq0500RecordType = ( (recordOfArquivo.get("0500.RecordType")!=null) ? recordOfArquivo.get("0500.RecordType") : new String("") ); // String arq0500RecordType = getStringValue(recordOfArquivo.get("0500.RecordType"));
 				String arq0500DtTransac = ( (recordOfArquivo.get("0500.DtTransac")!=null) ? recordOfArquivo.get("0500.DtTransac") : new String("") );
 				String arq0500AuthorizationCode = ( (recordOfArquivo.get("0500.AuthorizationCode")!=null) ? recordOfArquivo.get("0500.AuthorizationCode") : new String("") );
+				String arq0500VlrVenda= ( (recordOfArquivo.get("0500.VlrVenda")!=null) ? recordOfArquivo.get("0500.VlrVenda") : new String("") );
 				String arq0500RowNum = ( (recordOfArquivo.get("0500.RowNum")!=null) ? recordOfArquivo.get("0500.RowNum") : new String("") );
 				String arq0501RecordType = ( (recordOfArquivo.get("0501.RecordType")!=null) ? recordOfArquivo.get("0501.RecordType") : new String("") );
 				String arq0501ProductCode = ( (recordOfArquivo.get("0501.ProductCode")!=null) ? recordOfArquivo.get("0501.ProductCode") : new String("") );
@@ -377,6 +379,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 					jsonObjArquivo.addProperty("arq0500RecordType", arq0500RecordType );
 					jsonObjArquivo.addProperty("arq0500DtTransac", arq0500DtTransac );
 					jsonObjArquivo.addProperty("arq0500AuthorizationCode", arq0500AuthorizationCode );
+					jsonObjArquivo.addProperty("arq0500VlrVenda", arq0500VlrVenda );
 					jsonObjArquivo.addProperty("arq0500RowNum", arq0500RowNum );
 					jsonObjArquivo.addProperty("arq0501RecordType", arq0501RecordType );
 					jsonObjArquivo.addProperty("arq0501ProductCode", arq0501ProductCode );
@@ -481,7 +484,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 						String testdata_CardScheme = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("cardScheme").getAsString() );
 						String testdata_merchant = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("merchant").getAsString() );
 						String testdata_productCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("productCode").getAsString() );
-						String testdata_pmount = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("amount").getAsString() );
+						String testdata_amount = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("amount").getAsString() );
 						String testdata_valueDate = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("valueDate").getAsString() );
 						String testdata_installment = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("installment").getAsString() );
 						String testdata_authorizationCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("testdata")).get("authorizationCode").getAsString() );
@@ -495,6 +498,7 @@ public class ValidacaoArquivoTransacaoFunctionality {
 							String arquivo_arq0500RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500RecordType").getAsString() );
 							String arquivo_arq0500DtTransac = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500DtTransac").getAsString() );
 							String arquivo_arq0500AuthorizationCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500AuthorizationCode").getAsString() );
+							String arquivo_arq0500VlrVenda = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500VlrVenda").getAsString() );
 							String arquivo_arq0500RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0500RowNum").getAsString() );
 							String arquivo_arq0501RecordType = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501RecordType").getAsString() );
 							String arquivo_arq0501ProductCode = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0501ProductCode").getAsString() );
@@ -512,7 +516,10 @@ public class ValidacaoArquivoTransacaoFunctionality {
 							String arquivo_arq0507RowNum = getStringValue( (jsonObjArrayItem.getAsJsonObject("arquivo")).get("arq0507RowNum").getAsString() );
 							
 							testdata_productCode = "000".concat(testdata_productCode).substring("000".concat(testdata_productCode).length()-3, "000".concat(testdata_productCode).length());
-							testdata_valueDate = ((testdata_valueDate.substring(6, 10)).concat(testdata_valueDate.substring(3, 5)).concat(testdata_valueDate.substring(0, 2)) ); 
+							testdata_valueDate = ((testdata_valueDate.substring(6, 10)).concat(testdata_valueDate.substring(3, 5)).concat(testdata_valueDate.substring(0, 2)) );
+							double testdata_amountDouble = Double.parseDouble(testdata_amount); // number.replace(",",".")
+							String testdata_amountFmt  = new DecimalFormat("#############").format(testdata_amountDouble*100);
+							testdata_amountFmt = "000000000000".substring(0, 12 - testdata_amountFmt.length()).concat(testdata_amountFmt);
 							
 							if (!testdata_productCode.equals(arquivo_arq0501ProductCode)) {
 								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
@@ -529,6 +536,17 @@ public class ValidacaoArquivoTransacaoFunctionality {
 										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "valueDate").replaceFirst("%s", "planilha validação").replaceFirst("%s", "arquivo"), 
 										"ValueDate: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_valueDate).replaceFirst("%s", arquivo_arq0500DtTransac).replaceFirst("%s", arquivo_arq0500RecordType).replaceFirst("%s", arquivo_arq0500RowNum));
 								bReturn = false;								
+							} else if (!testdata_amountFmt.equals(arquivo_arq0500VlrVenda)) {
+								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
+										ERRORMSG_FAIL_CROSS_VALIDATION_EQUALS.replaceFirst("%s", "amount").replaceFirst("%s", "planilha validação").replaceFirst("%s", "arquivo"), 
+										"Amount: '%s' x '%s' (RecType: '%s', RowNum: %s)".replaceFirst("%s", testdata_amountFmt).replaceFirst("%s", arquivo_arq0500VlrVenda).replaceFirst("%s", arquivo_arq0500RecordType).replaceFirst("%s", arquivo_arq0500RowNum));
+								bReturn = false;
+								//
+							} else if (testdata_captureMethod.equals("Chip") && !arquivo_arq0507RecordType.equals("0507")) {
+								jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, 
+										ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "Capture Method").replaceFirst("%s", "planilha validação").replaceFirst("%s", "arquivo"), 
+										"CaptureMethod: '%s' nao existe no arquivo abaixo da sequencia ('0500', .. , '0507') (RecType: '0500'., RowNum: %s)".replaceFirst("%s", testdata_captureMethod).replaceFirst("%s", arquivo_arq0500RowNum));
+								bReturn = false;								
 							} else {
 								// Passed
 								jsonObjCrossValidationReport(STATUS_PASSED, testdata_merchant, testdata_authorizationCode, "", "");
@@ -536,12 +554,12 @@ public class ValidacaoArquivoTransacaoFunctionality {
 							
 							
 						} else {
-							jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "arquivo"), "");
+							jsonObjCrossValidationReport(STATUS_FAILED, testdata_merchant, testdata_authorizationCode, ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "registro correspondente no arquivo").replaceFirst("%s", "arquivo"), "");
 							bReturn = false;
 						}
 						
 					} else {
-						jsonObjCrossValidationReport(STATUS_FAILED, "", "", ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "testdata"), "");
+						jsonObjCrossValidationReport(STATUS_FAILED, "", "", ERRORMSG_FAIL_CROSS_VALIDATON_JSON.replaceFirst("%s", "").replaceFirst("%s", "testdata"), "");
 						bReturn = false;
 					}
 										
