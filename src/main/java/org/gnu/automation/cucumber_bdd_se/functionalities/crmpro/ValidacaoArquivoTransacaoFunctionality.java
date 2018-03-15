@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.gnu.automation.cucumber_bdd_se.util.FileTable;
 import org.gnu.automation.cucumber_bdd_se.util.RecordOf;
@@ -173,22 +175,38 @@ public class ValidacaoArquivoTransacaoFunctionality {
 			throw new Exception(ERRORMSG_OBJECT_UNDEFINED.replaceFirst("%s","tableOfConfigLayoutRecField"));
 		if (this.tableOfConfigLayoutRecSegment==null) 
 			throw new Exception(ERRORMSG_OBJECT_UNDEFINED.replaceFirst("%s","tableOfConfigLayoutRecSegment"));
+
+		System.out.println("getParamPageObjects(): " + getParamPageObjects());
 		
-		// WebPage navigation ...
-		if (this.driver==null) {
-			driver = WebDriverFactory.getIEDriver();
-//			driver = WebDriverFactory.getChromeDriver();		
-		}
-		
-		// mover para pageobjects
-		driver.get("https://www.freecrm.com");
-		driver.findElement(By.name("username")).sendKeys("naveenk");
-		driver.findElement(By.name("password")).sendKeys("test@123");
-		driver.findElement(By.name("password")).sendKeys(Keys.RETURN);
+//		// WebPage navigation ...
+//		if (this.driver==null) {
+//			driver = WebDriverFactory.getIEDriver();
+////			driver = WebDriverFactory.getChromeDriver();		
+//		}
+//		
+//		// mover para pageobjects
+//		driver.get("https://www.freecrm.com");
+//		driver.findElement(By.name("username")).sendKeys("naveenk");
+//		driver.findElement(By.name("password")).sendKeys("test@123");
+//		driver.findElement(By.name("password")).sendKeys(Keys.RETURN);
 		
 	}
 	
 	
+	private List<String> getParamPageObjects() throws Exception {
+		List<String> strListReturn = new ArrayList<String>();
+		
+		for (int i=0;i<this.tableOfTestDataValidacao.size();i++) {
+			// Get each recordOf from tableOfTestDataValidacao ...
+			RecordOf recordOfTestData = tableOfTestDataValidacao.get(i);
+			String merchant = ( (recordOfTestData.get("Merchant")!=null) ? recordOfTestData.get("Merchant") : new String("") );
+			String valueDate = ( (recordOfTestData.get("Value Date")!=null) ? recordOfTestData.get("Value Date") : new String("") );
+			valueDate = ( (valueDate.length()> 10) ) ? valueDate.substring(0, 10) : valueDate;
+			strListReturn.add(merchant + ";" + valueDate);
+		}
+		return strListReturn;
+	}
+
 	public void buscarSiteRedmineTransacaoCorrespondente() throws Exception {
 		
 		// Check consistency ...
