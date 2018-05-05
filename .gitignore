@@ -2,7 +2,7 @@
 /tmp/*
 /tmp*.*
 /logs/*
-
+/.settings/
 
 /src/main/java/org/gnu/automation/cucumber_bdd_se/functionalities/firstdata/*
 /src/main/java/org/gnu/automation/cucumber_bdd_se/pageobjects/firstdata/*
