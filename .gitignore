@@ -12,3 +12,5 @@
 /src/main/resources/testdata/firstdata/*
 
 /src/test/java/org/gnu/automation/cucumber_bdd_se/RunTestFirstdata.java
+.classpath 
+.settings/ 
