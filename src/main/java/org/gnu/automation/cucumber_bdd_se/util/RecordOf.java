@@ -10,7 +10,7 @@ import java.util.Map;
  * 
  * Description:  RecordOf is an abstraction of a record  of
  * 
- * Author:       Josemar Silva - josemarsilva@inmetrics.com.br
+ * Author:       Josemar Silva
  * 
  */
 public class RecordOf {

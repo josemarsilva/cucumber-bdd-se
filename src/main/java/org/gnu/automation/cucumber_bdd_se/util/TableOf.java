@@ -12,7 +12,7 @@ import java.util.List;
  * 
  * Description:  TableOf is an abstraction of a collection of Record Of
  * 
- * Author:       Josemar Silva - josemarsilva@inmetrics.com.br
+ * Author:       Josemar Silva
  * 
  */
 public class TableOf {
