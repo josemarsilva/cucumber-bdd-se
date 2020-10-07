@@ -1,9 +1,13 @@
+# Custom - Java Eclipse project
+.classpath
+.project
+/.settings/
 /target/
 /tmp/*
 /tmp*.*
 /logs/*
-/.settings/
 
+# Custom - Java Eclipse project
 /src/main/java/org/gnu/automation/cucumber_bdd_se/functionalities/firstdata/*
 /src/main/java/org/gnu/automation/cucumber_bdd_se/pageobjects/firstdata/*
 /src/main/java/org/gnu/automation/cucumber_bdd_se/steps/firstdata/*
@@ -12,5 +16,4 @@
 /src/main/resources/testdata/firstdata/*
 
 /src/test/java/org/gnu/automation/cucumber_bdd_se/RunTestFirstdata.java
-.classpath 
-.settings/ 
+
